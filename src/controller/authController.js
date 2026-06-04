@@ -34,7 +34,12 @@ export async function registerUser(req, res){
         role: user.role,
     }, process.env.JWT_SECRET);
  
-    res.cookie("token", token);
+    res.cookie("token", token, {
+        httpOnly: true,        
+        secure: true,          
+        sameSite: 'strict',    
+        maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
+    });
 
     res.status(201).json({
         message:"User registered successfully.",
@@ -53,21 +58,26 @@ export async function loginUser(req, res){
         ]
     });
     if(!User){
-        res.status(409).json({message:"User does not exist."});
+        return res.status(409).json({message:"User does not exist."});
     }
     const isPasswordValid = await bcrypt.compare(password, User.password,)
 
-    if(!User){
-        res.status(401).json({message:"Invalid Credentials."});
+    if(!isPasswordValid){
+        return res.status(401).json({message:"Invalid Credentials."});
     }
     const token = jwt.sign({
         id: User._id,
         role: User.role,
     }, process.env.JWT_SECRET);
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+        httpOnly: true,        
+        secure: true,          
+        sameSite: 'strict',    
+        maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
+    });
 
-    res.status(201).json({
+    res.status(200).json({
         message:"User Login successfull.",
         User
     });
@@ -76,5 +86,14 @@ export async function loginUser(req, res){
 export async function logOutUser(req, res){
     res.clearCookie("token");
     res.status(200).json({message:"User Loged Out successfull.",});
+}
+
+export async function getProfile(req, res){
+    try {
+        const user = await UserModel.findById(req.user.id).select('-password');
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({message: "Error fetching profile"});
+    }
 }
 

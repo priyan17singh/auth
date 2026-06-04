@@ -9,14 +9,14 @@ const upload = multer({
 
 const router = express.Router();
 
-router.get("/",getAllMusics)
+router.get("/",getAllMusics);
 router.post("/upload", authArtist, upload.single('music'), createMusic);
-router.delete("/:musicId", authArtist, deleteMusic)
+router.delete("/:musicId", authArtist, deleteMusic);
 
-router.get("/albums",getAllAlbums)
-router.get("/albums/:albumId",getAlbum)
+router.get("/albums",getAllAlbums);
+router.get("/albums/:albumId",getAlbum);
 router.post("/album", authArtist, createAlbum);
-router.delete("/album/:albumId", authArtist, deleteAlbum)
+router.delete("/album/:albumId", authArtist, deleteAlbum);
 
 
 export default router;
